@@ -1,0 +1,16 @@
+{
+    "name": "hp/exo1-blogin-mvc",
+    "description": "blogin (gestion des article) avec le model MVC",
+    "autoload": {
+        "psr-4": {
+            "August\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "august-dev-pro",
+            "email": "augustinselete01@gmail.com"
+        }
+    ],
+    "require": {}
+}

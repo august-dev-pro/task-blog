@@ -1,0 +1,298 @@
+<?php
+if (isset($_GET['submit'])) { // Vérifiez si le bouton de soumission a été cliqué
+    if (isset($_GET['recherche'])) {
+        $recherche = $_GET['recherche'];
+        echo "Vous avez recherché : " . htmlspecialchars($recherche);
+    } else {
+        echo "Aucune recherche effectuée.";
+    }
+} else {
+    echo "Le formulaire n'a pas été soumis.";
+}
+?>
+
+
+<?php
+if (isset($_GET['action'])) {
+    $action = $_GET['action'];
+} else {
+    $action = 'default'; // Par défaut, afficher la page d'accueil
+}
+
+switch ($action) {
+    case 'search':
+        require 'Controller/SearchController.php';
+        $searchController = new SearchController();
+        $searchController->search();
+        break;
+    default:
+        // Affichez la page d'accueil par défaut
+        require 'View/home.php';
+}
+?>
+
+<!-- Controller/SearchController.php (Contrôleur) -->
+<?php
+require 'Model/ArticleModel.php';
+
+class SearchController
+{
+    public function search()
+    {
+        if (isset($_GET['q'])) {
+            $searchTerm = $_GET['q'];
+            $articleModel = new ArticleModel();
+            $results = $articleModel->searchArticles($searchTerm);
+            require 'View/searchResults.php';
+        }
+    }
+}
+?>
+
+<!-- Model/ArticleModel.php (Modèle) -->
+<?php
+
+class ArticleModel
+{
+    private $db;
+
+    public function __construct()
+    {
+        // Initialisez la connexion à votre base de données ici
+        $host = 'votre_hôte';
+        $dbname = 'votre_base_de_données';
+        $username = 'votre_utilisateur';
+        $password = 'votre_mot_de_passe';
+
+        try {
+            $this->db = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+        } catch (PDOException $e) {
+            die("Erreur de connexion à la base de données : " . $e->getMessage());
+        }
+    }
+
+    public function searchArticles($searchTerm)
+    {
+        // Effectuez la requête SQL pour rechercher des articles en fonction du terme de recherche
+        $query = "SELECT titre, contenu FROM articles WHERE titre LIKE :searchTerm OR contenu LIKE :searchTerm";
+        $stmt = $this->db->prepare($query);
+
+        // Assurez-vous de gérer le terme de recherche pour éviter les attaques par injection SQL
+        $searchTerm = "% $searchTerm %";
+        $stmt->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
+        $stmt->execute();
+
+        // Récupérez les résultats de la requête
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $results;
+    }
+}
+
+?>
+
+<!-- View/searchResults.php (Vue) -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Résultats de la recherche</title>
+</head>
+
+<body>
+    <h1>Résultats de la recherche</h1>
+    <div id="searchResults">
+        <!-- Les résultats AJAX seront affichés ici -->
+    </div>
+</body>
+
+</html>
+
+
+
+<script>
+    // Ce script gère la recherche en temps réel
+    document.addEventListener("DOMContentLoaded", function() {
+        // Sélectionnez l'élément d'entrée de recherche
+        var searchInput = document.querySelector("#searchInput");
+
+        // Sélectionnez l'élément de résultats
+        var searchResults = document.querySelector("#searchResults");
+
+        // Ajoutez un écouteur d'événements pour le champ de recherche
+        searchInput.addEventListener("input", function() {
+            // Récupérez la valeur du champ de recherche
+            var searchTerm = searchInput.value;
+
+            // Effectuez une requête AJAX pour rechercher les résultats
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "votre_url_de_recherche.php?q=" + searchTerm, true);
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    // Analysez la réponse JSON de la requête AJAX
+                    var results = JSON.parse(xhr.responseText);
+
+                    // Générez le HTML des résultats
+                    var resultsHTML = "";
+                    results.forEach(function(result) {
+                        resultsHTML += "<h2>" + result.titre + "</h2>";
+                        resultsHTML += "<p>" + result.contenu + "</p>";
+                    });
+
+                    // Affichez les résultats dans la div des résultats
+                    searchResults.innerHTML = resultsHTML;
+                }
+            };
+
+            xhr.send();
+        });
+    });
+</script>
+
+
+
+
+<!-- iaeyfyfgayifgaeygfiyzfgefgyizefizefgeifgyiefgzfgyifgifzyfezfzef -->
+<?php
+function getAction()
+{
+    if (isset($_GET['action'])) {
+        return $_GET['action'];
+    } else {
+        return 'default'; // Par défaut, afficher la page d'accueil
+    }
+}
+
+function routeAction($action)
+{
+    switch ($action) {
+        case 'search':
+            require 'Controller/SearchController.php';
+            $searchController = new SearchController();
+            $searchController->search();
+            break;
+        default:
+            // Affichez la page d'accueil par défaut
+            require 'View/home.php';
+    }
+}
+
+$action = getAction();
+routeAction($action);
+?>
+
+<!-- Controller/SearchController.php (Contrôleur) -->
+<?php
+require 'Model/ArticleModel.php';
+
+class SearchController
+{
+    public function search()
+    {
+        if (isset($_GET['q'])) {
+            $searchTerm = $_GET['q'];
+            $articleModel = new ArticleModel();
+            $results = $articleModel->searchArticles($searchTerm);
+            require 'View/searchResults.php';
+        }
+    }
+}
+?>
+
+<!-- Model/ArticleModel.php (Modèle) -->
+<?php
+class ArticleModel
+{
+    private $db;
+
+    public function __construct()
+    {
+        // Initialisez la connexion à votre base de données ici
+        $host = 'votre_hôte';
+        $dbname = 'votre_base_de_données';
+        $username = 'votre_utilisateur';
+        $password = 'votre_mot_de_passe';
+
+        try {
+            $this->db = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+        } catch (PDOException $e) {
+            die("Erreur de connexion à la base de données : " . $e->getMessage());
+        }
+    }
+
+    public function searchArticles($searchTerm)
+    {
+        // Effectuez la requête SQL pour rechercher des articles en fonction du terme de recherche
+        $query = "SELECT titre, contenu FROM articles WHERE titre LIKE :searchTerm OR contenu LIKE :searchTerm";
+        $stmt = $this->db->prepare($query);
+
+        // Assurez-vous de gérer le terme de recherche pour éviter les attaques par injection SQL
+        $searchTerm = "%$searchTerm%";
+        $stmt->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
+        $stmt->execute();
+
+        // Récupérez les résultats de la requête
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $results;
+    }
+}
+?>
+
+<!-- View/searchResults.php (Vue) -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Résultats de la recherche</title>
+</head>
+
+<body>
+    <h1>Résultats de la recherche</h1>
+    <div id="searchResults">
+        <!-- Les résultats AJAX seront affichés ici -->
+    </div>
+</body>
+
+</html>
+
+<script>
+    // Ce script gère la recherche en temps réel
+    document.addEventListener("DOMContentLoaded", function() {
+        // Sélectionnez l'élément d'entrée de recherche
+        var searchInput = document.querySelector("#searchInput");
+
+        // Sélectionnez l'élément de résultats
+        var searchResults = document.querySelector("#searchResults");
+
+        // Ajoutez un écouteur d'événements pour le champ de recherche
+        searchInput.addEventListener("input", function() {
+            // Récupérez la valeur du champ de recherche
+            var searchTerm = searchInput.value;
+
+            // Effectuez une requête AJAX pour rechercher les résultats
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "votre_url_de_recherche.php?q=" + searchTerm, true);
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    // Analysez la réponse JSON de la requête AJAX
+                    var results = JSON.parse(xhr.responseText);
+
+                    // Générez le HTML des résultats
+                    var resultsHTML = "";
+                    results.forEach(function(result) {
+                        resultsHTML += "<h2>" + result.titre + "</h2>";
+                        resultsHTML += "<p>" + result.contenu + "</p>";
+                    });
+
+                    // Affichez les résultats dans la div des résultats
+                    searchResults.innerHTML = resultsHTML;
+                }
+            };
+
+            xhr.send();
+        });
+    });
+</script>
